@@ -25,7 +25,7 @@ export default function ExpensePieChart({ data }: Props) {
           cx="50%"
           cy="50%"
           outerRadius={100}
-          label={({ name, percentage }) => `${name} ${percentage ?? 0}%`}
+          label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
         >
           {filtered.map((_, i) => (
             <Cell key={i} fill={COLORS[i % COLORS.length]} />

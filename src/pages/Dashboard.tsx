@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchDashboardSummary } from '../api';
+import { fetchDashboardSummary, fetchReportByProject } from '../api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ReportSummaryCards from '../components/Report/ReportSummaryCards';
 import ProfitChart from '../components/Report/ProfitChart';
@@ -9,6 +9,12 @@ export default function Dashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: fetchDashboardSummary,
+  });
+
+  // Fetch project expenses for pie chart (current month implied by no date filter = all time)
+  const { data: projectData } = useQuery({
+    queryKey: ['reports', 'by-project', {}],
+    queryFn: () => fetchReportByProject({}),
   });
 
   if (isLoading) return <LoadingSpinner />;
@@ -28,6 +34,11 @@ export default function Dashboard() {
     profit: t.income - t.expense,
   }));
 
+  const projectExpenses = (projectData || []).filter(p => p.expense > 0).map(p => ({
+    name: p.project_name,
+    amount: p.expense,
+  }));
+
   return (
     <div>
       <ReportSummaryCards cards={cards} />
@@ -38,8 +49,8 @@ export default function Dashboard() {
           <ProfitChart data={trendData} />
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-base font-semibold text-gray-700 mb-4">本月支出分类</h3>
-          <ExpensePieChart data={data.category_breakdown} />
+          <h3 className="text-base font-semibold text-gray-700 mb-4">支出按项目统计</h3>
+          <ExpensePieChart data={projectExpenses} />
         </div>
       </div>
     </div>
