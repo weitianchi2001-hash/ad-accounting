@@ -14,7 +14,7 @@ interface Props {
 export default function ProfitChart({ data }: Props) {
   const chartData = data.map(d => ({
     ...d,
-    profit: (d.profit ?? d.income) - d.expense,
+    profit: d.profit !== undefined ? d.profit : d.income - d.expense,
   }));
 
   return (
