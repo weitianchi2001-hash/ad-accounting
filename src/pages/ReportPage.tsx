@@ -125,8 +125,6 @@ export default function ReportPage() {
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">项目</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">客户</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">参与客户</th>
                 <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">收入</th>
                 <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">支出</th>
                 <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">利润</th>
@@ -136,8 +134,6 @@ export default function ReportPage() {
               {(byProject || []).map(p => (
                 <tr key={p.project_id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="px-6 py-3 text-sm font-medium">{p.project_name}</td>
-                  <td className="px-6 py-3 text-sm text-gray-500">{p.client_name || '-'}</td>
-                  <td className="px-6 py-3 text-sm text-gray-500">{p.participant_clients || '-'}</td>
                   <td className="px-6 py-3 text-sm text-right text-green-600">{formatMoney(p.income)}</td>
                   <td className="px-6 py-3 text-sm text-right text-red-500">{formatMoney(p.expense)}</td>
                   <td className="px-6 py-3 text-sm text-right font-medium" style={{ color: p.profit >= 0 ? '#16a34a' : '#dc2626' }}>
