@@ -2,3 +2,5 @@ node_modules/
 server/data/*.db
 server/dist/
 *.db
+runtime/
+*.zip

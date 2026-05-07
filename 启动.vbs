@@ -2,15 +2,18 @@ Set WshShell = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
+nodeExe = scriptDir & "\runtime\node.exe"
 serverDir = scriptDir & "\server"
+tsxPath = serverDir & "\node_modules\tsx\dist\cli.mjs"
+serverFile = serverDir & "\src\index.ts"
 
-' Start the server hidden
-WshShell.Run "cmd /c ""cd /d """ & serverDir & """ && npx tsx src/index.ts""", 0, False
+' Start server using bundled Node.js
+WshShell.Run """" & nodeExe & """ """ & tsxPath & """ """ & serverFile & """", 0, False
 
-' Wait for server
-WScript.Sleep 4000
+' Wait for server to start
+WScript.Sleep 5000
 
-' Try Chrome app mode first, then Edge, then default browser
+' Open in Chrome app mode
 chrome = """C:\Program Files\Google\Chrome\Application\chrome.exe"" --app=http://localhost:3001"
 edge = "msedge --app=http://localhost:3001"
 
