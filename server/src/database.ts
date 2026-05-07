@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS revenues (
     payment_date TEXT,
     payment_method TEXT,
     size TEXT,
+    square_meters REAL DEFAULT 0,
     status TEXT DEFAULT '未支付',
     notes TEXT,
     created_at DATETIME DEFAULT (datetime('now', 'localtime')),
@@ -92,6 +93,7 @@ CREATE TABLE IF NOT EXISTS expenses (
     vendor TEXT,
     payment_method TEXT,
     size TEXT,
+    square_meters REAL DEFAULT 0,
     notes TEXT,
     created_at DATETIME DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
@@ -136,6 +138,8 @@ export async function initDatabase(): Promise<void> {
   // Migration: add size if missing
   try { db.run('ALTER TABLE revenues ADD COLUMN size TEXT'); } catch (_) {}
   try { db.run('ALTER TABLE expenses ADD COLUMN size TEXT'); } catch (_) {}
+  try { db.run('ALTER TABLE revenues ADD COLUMN square_meters REAL DEFAULT 0'); } catch (_) {}
+  try { db.run('ALTER TABLE expenses ADD COLUMN square_meters REAL DEFAULT 0'); } catch (_) {}
 
   const countResult = db.exec('SELECT COUNT(*) as count FROM expense_categories');
   const count = countResult[0]?.values[0][0] as number;

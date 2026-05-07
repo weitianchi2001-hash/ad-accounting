@@ -1,8 +1,9 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { fetchClients, fetchProjects } from '../../api';
+import { calcSquareMeters } from '../../lib/calc-size';
 import type { Revenue, Client, Project } from '../../types';
 
 const schema = z.object({
@@ -12,6 +13,7 @@ const schema = z.object({
   description: z.string().optional().or(z.literal('')),
   invoice_number: z.string().optional().or(z.literal('')),
   size: z.string().optional().or(z.literal('')),
+  square_meters: z.number().optional(),
   payment_date: z.string().optional().or(z.literal('')),
   payment_method: z.string().optional().or(z.literal('')),
   status: z.string().optional(),
@@ -39,7 +41,7 @@ export default function RevenueForm({ initial, onSubmit, onCancel }: Props) {
   });
   const projects = (pData?.success ? pData.data : []) as Project[];
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       client_id: initial?.client_id ? String(initial.client_id) : '',
@@ -55,8 +57,15 @@ export default function RevenueForm({ initial, onSubmit, onCancel }: Props) {
     },
   });
 
+  const sizeValue = useWatch({ control, name: 'size' });
+  const sqm = calcSquareMeters(sizeValue || '');
+
+  function handleFormSubmit(data: FormData) {
+    onSubmit({ ...data, square_meters: sqm });
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">客户 *</label>
         <select {...register('client_id')} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -84,7 +93,10 @@ export default function RevenueForm({ initial, onSubmit, onCancel }: Props) {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">尺寸</label>
-          <input {...register('size')} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="如：1920x1080" />
+          <input {...register('size')} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="如：3x4" />
+          {sqm > 0 && (
+            <p className="mt-1 text-xs text-blue-600 font-medium">{sqm} ㎡</p>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4">

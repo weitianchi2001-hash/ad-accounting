@@ -88,6 +88,7 @@ export default function ExpensePage() {
                   <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">供应商</th>
                   <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">描述</th>
                   <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">尺寸</th>
+                  <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">平米</th>
                   <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">金额</th>
                   <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">操作</th>
                 </tr>
@@ -101,6 +102,7 @@ export default function ExpensePage() {
                     <td className="px-6 py-3 text-sm text-gray-500">{e.vendor || '-'}</td>
                     <td className="px-6 py-3 text-sm text-gray-500">{e.description || '-'}</td>
                     <td className="px-6 py-3 text-sm text-gray-500">{e.size || '-'}</td>
+                    <td className="px-6 py-3 text-sm text-right text-gray-500">{e.square_meters ? `${e.square_meters}㎡` : '-'}</td>
                     <td className="px-6 py-3 text-sm text-right text-red-500 font-medium">{formatMoney(e.amount)}</td>
                     <td className="px-6 py-3 text-sm text-right">
                       <button onClick={() => { setEditing(e); setModalOpen(true); }} className="p-1.5 hover:bg-gray-100 rounded text-blue-500"><Edit size={15} /></button>

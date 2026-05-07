@@ -38,6 +38,7 @@ export interface Revenue {
   payment_date: string | null;
   payment_method: string | null;
   size: string | null;
+  square_meters: number;
   status: string;
   notes: string | null;
   created_at: string;
@@ -55,6 +56,7 @@ export interface Expense {
   vendor: string | null;
   payment_method: string | null;
   size: string | null;
+  square_meters: number;
   notes: string | null;
   created_at: string;
   category_name?: string;

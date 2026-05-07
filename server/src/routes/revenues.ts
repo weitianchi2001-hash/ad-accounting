@@ -43,11 +43,11 @@ revenuesRouter.get('/revenues/:id', (req, res) => {
 
 revenuesRouter.post('/revenues', (req, res) => {
   try {
-    const { project_id, client_id, amount, description, invoice_number, payment_date, payment_method, size, status, notes } = req.body;
+    const { project_id, client_id, amount, description, invoice_number, payment_date, payment_method, size, square_meters, status, notes } = req.body;
     if (!client_id || !amount) { res.status(400).json({ success: false, error: '客户和金额不能为空' }); return; }
     const result = run(
-      `INSERT INTO revenues (project_id, client_id, amount, description, invoice_number, payment_date, payment_method, size, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [project_id || null, client_id, amount, description || null, invoice_number || null, payment_date || null, payment_method || null, size || null, status || '未支付', notes || null]
+      `INSERT INTO revenues (project_id, client_id, amount, description, invoice_number, payment_date, payment_method, size, square_meters, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [project_id || null, client_id, amount, description || null, invoice_number || null, payment_date || null, payment_method || null, size || null, square_meters || 0, status || '未支付', notes || null]
     );
     const revenue = get(`SELECT r.*, c.name as client_name, p.name as project_name FROM revenues r LEFT JOIN clients c ON r.client_id = c.id LEFT JOIN projects p ON r.project_id = p.id WHERE r.id = ?`, [result.lastInsertRowid]);
     res.json({ success: true, data: revenue });
@@ -60,10 +60,10 @@ revenuesRouter.put('/revenues/:id', (req, res) => {
   try {
     const existing = get<Revenue>('SELECT * FROM revenues WHERE id = ?', [req.params.id]);
     if (!existing) { res.status(404).json({ success: false, error: '收入记录不存在' }); return; }
-    const { project_id, client_id, amount, description, invoice_number, payment_date, payment_method, size, status, notes } = req.body;
+    const { project_id, client_id, amount, description, invoice_number, payment_date, payment_method, size, square_meters, status, notes } = req.body;
     run(
-      `UPDATE revenues SET project_id=?, client_id=?, amount=?, description=?, invoice_number=?, payment_date=?, payment_method=?, size=?, status=?, notes=? WHERE id=?`,
-      [project_id ?? existing.project_id, client_id || existing.client_id, amount ?? existing.amount, description ?? existing.description, invoice_number ?? existing.invoice_number, payment_date ?? existing.payment_date, payment_method ?? existing.payment_method, size ?? existing.size, status || existing.status, notes ?? existing.notes, req.params.id]
+      `UPDATE revenues SET project_id=?, client_id=?, amount=?, description=?, invoice_number=?, payment_date=?, payment_method=?, size=?, square_meters=?, status=?, notes=? WHERE id=?`,
+      [project_id ?? existing.project_id, client_id || existing.client_id, amount ?? existing.amount, description ?? existing.description, invoice_number ?? existing.invoice_number, payment_date ?? existing.payment_date, payment_method ?? existing.payment_method, size ?? existing.size, square_meters ?? existing.square_meters, status || existing.status, notes ?? existing.notes, req.params.id]
     );
     const updated = get(`SELECT r.*, c.name as client_name, p.name as project_name FROM revenues r LEFT JOIN clients c ON r.client_id = c.id LEFT JOIN projects p ON r.project_id = p.id WHERE r.id = ?`, [req.params.id]);
     res.json({ success: true, data: updated });

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, AlertCircle } from 'lucide-react';
 import { fetchRevenues, createRevenue, updateRevenue, deleteRevenue, fetchClients, fetchProjects } from '../api';
 import type { Revenue, Client, Project } from '../types';
 import Modal from '../components/common/Modal';
@@ -39,9 +39,17 @@ export default function RevenuePage() {
     queryKey: ['revenues', params],
     queryFn: () => fetchRevenues(params),
   });
-  const revenues = (data?.success ? data.data : []) as (Revenue & { client_name?: string; project_name?: string })[];
+  const revenues = (data?.success ? data.data : []) as (Revenue & { client_name?: string; project_name?: string; square_meters?: number })[];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / 15);
+
+  // Also fetch unpaid for summary bar
+  const { data: unpaidData } = useQuery({
+    queryKey: ['revenues', 'unpaid'],
+    queryFn: () => fetchRevenues({ status: '未支付', page_size: 999 }),
+  });
+  const unpaidRevenues = (unpaidData?.success ? unpaidData.data : []) as (Revenue & { client_name?: string; project_name?: string; square_meters?: number })[];
+  const unpaidTotal = useMemo(() => unpaidRevenues.reduce((s, r) => s + r.amount, 0), [unpaidRevenues]);
 
   const createMut = useMutation({
     mutationFn: (body: Partial<Revenue>) => createRevenue(body),
@@ -58,8 +66,35 @@ export default function RevenuePage() {
 
   const formatMoney = (v: number) => v.toLocaleString('zh-CN', { minimumFractionDigits: 2 });
 
+  function quickFilterUnpaid() {
+    setFilterStatus(filterStatus === '未支付' ? '' : '未支付');
+    setPage(1);
+  }
+
+  const columns = ['发票号', '客户', '项目', '描述', '尺寸', '平米', '金额', '日期', '支付方式', '状态', '操作'];
+
   return (
     <div>
+      {/* Unpaid summary bar */}
+      {unpaidTotal > 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertCircle size={20} className="text-yellow-600" />
+            <span className="text-sm font-medium text-yellow-800">
+              未支付：{unpaidRevenues.length} 笔，共计 ¥{formatMoney(unpaidTotal)}
+            </span>
+          </div>
+          <button
+            onClick={quickFilterUnpaid}
+            className={`px-3 py-1.5 text-xs rounded-lg font-medium ${
+              filterStatus === '未支付' ? 'bg-yellow-500 text-white' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+            }`}
+          >
+            {filterStatus === '未支付' ? '显示全部' : '只看未支付'}
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div className="flex gap-2 flex-wrap">
           <select value={filterClient} onChange={e => { setFilterClient(e.target.value); setPage(1); }} className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
@@ -90,36 +125,41 @@ export default function RevenuePage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">发票号</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">客户</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">项目</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">描述</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">尺寸</th>
-                  <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">金额</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">日期</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">支付方式</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">状态</th>
-                  <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">操作</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">发票号</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">客户</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">项目</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">描述</th>
+                  <th className="text-left px-3 py-3 text-sm font-medium text-gray-500">尺寸</th>
+                  <th className="text-right px-3 py-3 text-sm font-medium text-gray-500">平米</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">金额</th>
+                  <th className="text-left px-3 py-3 text-sm font-medium text-gray-500">日期</th>
+                  <th className="text-left px-3 py-3 text-sm font-medium text-gray-500">方式</th>
+                  <th className="text-left px-3 py-3 text-sm font-medium text-gray-500">状态</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">操作</th>
                 </tr>
               </thead>
               <tbody>
-                {revenues.map(r => (
-                  <tr key={r.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="px-6 py-3 text-sm text-gray-500">{r.invoice_number || '-'}</td>
-                    <td className="px-6 py-3 text-sm">{r.client_name || '-'}</td>
-                    <td className="px-6 py-3 text-sm text-gray-500">{r.project_name || '-'}</td>
-                    <td className="px-6 py-3 text-sm text-gray-500">{r.description || '-'}</td>
-                    <td className="px-6 py-3 text-sm text-gray-500">{r.size || '-'}</td>
-                    <td className="px-6 py-3 text-sm text-right text-green-600 font-medium">{formatMoney(r.amount)}</td>
-                    <td className="px-6 py-3 text-sm text-gray-500">{r.payment_date || '-'}</td>
-                    <td className="px-6 py-3 text-sm text-gray-500">{r.payment_method || '-'}</td>
-                    <td className="px-6 py-3"><StatusBadge status={r.status} /></td>
-                    <td className="px-6 py-3 text-sm text-right">
-                      <button onClick={() => { setEditing(r); setModalOpen(true); }} className="p-1.5 hover:bg-gray-100 rounded text-blue-500"><Edit size={15} /></button>
-                      <button onClick={() => setDeleting(r)} className="p-1.5 hover:bg-gray-100 rounded text-red-500 ml-1"><Trash2 size={15} /></button>
-                    </td>
-                  </tr>
-                ))}
+                {revenues.map(r => {
+                  const isUnpaid = r.status === '未支付';
+                  return (
+                    <tr key={r.id} className={`border-b border-gray-100 hover:bg-gray-50 ${isUnpaid ? 'bg-red-50/30' : ''}`}>
+                      <td className="px-4 py-3 text-sm text-gray-500">{r.invoice_number || '-'}</td>
+                      <td className="px-4 py-3 text-sm">{r.client_name || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500">{r.project_name || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 max-w-[120px] truncate">{r.description || '-'}</td>
+                      <td className="px-3 py-3 text-sm text-gray-500">{r.size || '-'}</td>
+                      <td className="px-3 py-3 text-sm text-right">{r.square_meters ? `${r.square_meters}㎡` : '-'}</td>
+                      <td className="px-4 py-3 text-sm text-right text-green-600 font-medium">{formatMoney(r.amount)}</td>
+                      <td className="px-3 py-3 text-sm text-gray-500">{r.payment_date || '-'}</td>
+                      <td className="px-3 py-3 text-sm text-gray-500">{r.payment_method || '-'}</td>
+                      <td className="px-3 py-3"><StatusBadge status={r.status} /></td>
+                      <td className="px-4 py-3 text-sm text-right">
+                        <button onClick={() => { setEditing(r); setModalOpen(true); }} className="p-1.5 hover:bg-gray-100 rounded text-blue-500"><Edit size={15} /></button>
+                        <button onClick={() => setDeleting(r)} className="p-1.5 hover:bg-gray-100 rounded text-red-500 ml-1"><Trash2 size={15} /></button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
