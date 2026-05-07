@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchProfitSummary, fetchReportByProject,
-  fetchReportByCategory, fetchReceivablesAging,
+  fetchReceivablesAging,
 } from '../api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ReportSummaryCards from '../components/Report/ReportSummaryCards';
@@ -32,17 +32,12 @@ export default function ReportPage() {
     queryFn: () => fetchReportByProject(params),
   });
 
-  const { data: byCategory, isLoading: loading4 } = useQuery({
-    queryKey: ['reports', 'by-category', params],
-    queryFn: () => fetchReportByCategory(params),
-  });
-
   const { data: aging, isLoading: loading5 } = useQuery({
     queryKey: ['reports', 'aging'],
     queryFn: fetchReceivablesAging,
   });
 
-  const isLoading = loading1 || loading2 || loading4 || loading5;
+  const isLoading = loading1 || loading2 || loading5;
 
   const totalIncome = summary?.reduce((s, m) => s + m.income, 0) || 0;
   const totalExpense = summary?.reduce((s, m) => s + m.expense, 0) || 0;
@@ -77,8 +72,8 @@ export default function ReportPage() {
           <ProfitChart data={summary || []} />
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-base font-semibold text-gray-700 mb-4">支出类别占比</h3>
-          <ExpensePieChart data={(byCategory || []).map(c => ({ name: c.category_name, amount: c.amount, percentage: c.percentage }))} />
+          <h3 className="text-base font-semibold text-gray-700 mb-4">支出按项目统计</h3>
+          <ExpensePieChart data={(byProject || []).filter(p => p.expense > 0).map(p => ({ name: p.project_name, amount: p.expense }))} />
         </div>
       </div>
 
