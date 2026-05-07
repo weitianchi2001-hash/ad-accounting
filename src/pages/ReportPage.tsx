@@ -1,20 +1,19 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  fetchProfitSummary, fetchReportByProject, fetchReportByClient,
+  fetchProfitSummary, fetchReportByProject,
   fetchReportByCategory, fetchReceivablesAging,
 } from '../api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ReportSummaryCards from '../components/Report/ReportSummaryCards';
 import ProfitChart from '../components/Report/ProfitChart';
 import ExpensePieChart from '../components/Report/ExpensePieChart';
-import ClientBarChart from '../components/Report/ClientBarChart';
 import StatusBadge from '../components/common/StatusBadge';
 
 export default function ReportPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [tab, setTab] = useState<'project' | 'client' | 'aging'>('project');
+  const [tab, setTab] = useState<'project' | 'aging'>('project');
 
   const params = useMemo(() => {
     const p: Record<string, string> = {};
@@ -33,11 +32,6 @@ export default function ReportPage() {
     queryFn: () => fetchReportByProject(params),
   });
 
-  const { data: byClient, isLoading: loading3 } = useQuery({
-    queryKey: ['reports', 'by-client', params],
-    queryFn: () => fetchReportByClient(params),
-  });
-
   const { data: byCategory, isLoading: loading4 } = useQuery({
     queryKey: ['reports', 'by-category', params],
     queryFn: () => fetchReportByCategory(params),
@@ -48,7 +42,7 @@ export default function ReportPage() {
     queryFn: fetchReceivablesAging,
   });
 
-  const isLoading = loading1 || loading2 || loading3 || loading4 || loading5;
+  const isLoading = loading1 || loading2 || loading4 || loading5;
 
   const totalIncome = summary?.reduce((s, m) => s + m.income, 0) || 0;
   const totalExpense = summary?.reduce((s, m) => s + m.expense, 0) || 0;
@@ -65,12 +59,7 @@ export default function ReportPage() {
         <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm" />
         <span className="text-gray-400">—</span>
         <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm" />
-        <button
-          onClick={() => { setStartDate(''); setEndDate(''); }}
-          className="px-3 py-2 text-sm text-blue-500 hover:bg-blue-50 rounded-lg"
-        >
-          清除筛选
-        </button>
+        <button onClick={() => { setStartDate(''); setEndDate(''); }} className="px-3 py-2 text-sm text-blue-500 hover:bg-blue-50 rounded-lg">清除筛选</button>
       </div>
 
       <ReportSummaryCards
@@ -93,11 +82,6 @@ export default function ReportPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <h3 className="text-base font-semibold text-gray-700 mb-4">客户收入利润对比</h3>
-        <ClientBarChart data={byClient || []} />
-      </div>
-
       <div className="bg-white rounded-lg shadow-sm">
         <div className="border-b border-gray-200">
           <button
@@ -105,12 +89,6 @@ export default function ReportPage() {
             className={`px-6 py-3 text-sm font-medium ${tab === 'project' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'}`}
           >
             按项目利润
-          </button>
-          <button
-            onClick={() => setTab('client')}
-            className={`px-6 py-3 text-sm font-medium ${tab === 'client' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'}`}
-          >
-            按客户利润
           </button>
           <button
             onClick={() => setTab('aging')}
@@ -138,31 +116,6 @@ export default function ReportPage() {
                   <td className="px-6 py-3 text-sm text-right text-red-500">{formatMoney(p.expense)}</td>
                   <td className="px-6 py-3 text-sm text-right font-medium" style={{ color: p.profit >= 0 ? '#16a34a' : '#dc2626' }}>
                     {formatMoney(p.profit)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {tab === 'client' && (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">客户</th>
-                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">收入</th>
-                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">支出</th>
-                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">利润</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(byClient || []).map(c => (
-                <tr key={c.client_id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-6 py-3 text-sm font-medium">{c.client_name}</td>
-                  <td className="px-6 py-3 text-sm text-right text-green-600">{formatMoney(c.income)}</td>
-                  <td className="px-6 py-3 text-sm text-right text-red-500">{formatMoney(c.expense)}</td>
-                  <td className="px-6 py-3 text-sm text-right font-medium" style={{ color: c.profit >= 0 ? '#16a34a' : '#dc2626' }}>
-                    {formatMoney(c.profit)}
                   </td>
                 </tr>
               ))}
