@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Receipt, CreditCard,
-  Users, FolderKanban, BarChart3,
+  Users, FolderKanban, BarChart3, Brain,
 } from 'lucide-react';
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { to: '/clients', label: '客户管理', icon: Users },
   { to: '/projects', label: '项目管理', icon: FolderKanban },
   { to: '/reports', label: '利润分析', icon: BarChart3 },
+  { to: '/ai', label: 'AI 分析', icon: Brain },
 ];
 
 export default function Sidebar() {

@@ -6,6 +6,7 @@ import ExpensePage from './pages/ExpensePage';
 import ClientPage from './pages/ClientPage';
 import ProjectPage from './pages/ProjectPage';
 import ReportPage from './pages/ReportPage';
+import AIPage from './pages/AIPage';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/clients" element={<ClientPage />} />
         <Route path="/projects" element={<ProjectPage />} />
         <Route path="/reports" element={<ReportPage />} />
+        <Route path="/ai" element={<AIPage />} />
       </Route>
     </Routes>
   );

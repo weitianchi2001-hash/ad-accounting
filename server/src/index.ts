@@ -8,6 +8,7 @@ import { revenuesRouter } from './routes/revenues';
 import { expensesRouter } from './routes/expenses';
 import { categoriesRouter } from './routes/categories';
 import { reportsRouter } from './routes/reports';
+import { aiRouter } from './routes/ai';
 
 export async function createServer(port?: number) {
   const app = express();
@@ -22,6 +23,7 @@ export async function createServer(port?: number) {
   app.use('/api', expensesRouter);
   app.use('/api', categoriesRouter);
   app.use('/api', reportsRouter);
+  app.use('/api', aiRouter);
 
   // Serve frontend static files
   const frontendPath = path.join(__dirname, '..', '..', 'dist');

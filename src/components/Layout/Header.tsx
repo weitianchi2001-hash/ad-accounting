@@ -7,6 +7,7 @@ const titles: Record<string, string> = {
   '/clients': '客户管理',
   '/projects': '项目管理',
   '/reports': '利润分析',
+  '/ai': 'AI 分析',
 };
 
 export default function Header() {
