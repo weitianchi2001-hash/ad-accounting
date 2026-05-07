@@ -7,7 +7,7 @@
     "dev:client": "vite",
     "build": "vite build",
     "setup": "npm install && cd server && npm install",
-    "seed": "cd server && npx tsx src/seed.ts"
+    "start": "cd server && npx tsx src/index.ts"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",

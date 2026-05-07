@@ -1,89 +1,102 @@
-import { Pool, QueryResultRow } from 'pg';
+import initSqlJs, { Database as SqlJsDatabase } from 'sql.js';
+import fs from 'fs';
+import path from 'path';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL?.includes('render.com') ? { rejectUnauthorized: false } : false,
-  max: 5,
-});
+const DB_PATH = path.join(__dirname, '..', 'data', 'accounting.db');
 
-export async function query<T extends QueryResultRow = Record<string, unknown>>(
-  sql: string, params: unknown[] = []
-): Promise<T[]> {
-  const result = await pool.query(sql, params);
-  return result.rows as T[];
+let db: SqlJsDatabase;
+
+function saveDb() {
+  const data = db.export();
+  const buffer = Buffer.from(data);
+  fs.writeFileSync(DB_PATH, buffer);
 }
 
-export async function queryOne<T extends QueryResultRow = Record<string, unknown>>(
-  sql: string, params: unknown[] = []
-): Promise<T | undefined> {
-  const rows = await query<T>(sql, params);
+export function getDb(): SqlJsDatabase {
+  return db;
+}
+
+export function run(sql: string, params: unknown[] = []) {
+  db.run(sql, params);
+  saveDb();
+  const result = db.exec('SELECT last_insert_rowid()');
+  const lastInsertRowid = result.length > 0 ? (result[0].values[0][0] as number) : 0;
+  return { lastInsertRowid, changes: db.getRowsModified() };
+}
+
+export function all<T = Record<string, unknown>>(sql: string, params: unknown[] = []): T[] {
+  const stmt = db.prepare(sql);
+  stmt.bind(params);
+  const rows: T[] = [];
+  while (stmt.step()) {
+    rows.push(stmt.getAsObject() as unknown as T);
+  }
+  stmt.free();
+  return rows;
+}
+
+export function get<T = Record<string, unknown>>(sql: string, params: unknown[] = []): T | undefined {
+  const rows = all<T>(sql, params);
   return rows.length > 0 ? rows[0] : undefined;
-}
-
-export async function run(sql: string, params: unknown[] = []): Promise<{ lastInsertId: number; rowCount: number }> {
-  const result = await pool.query(sql, params);
-  // For INSERT...RETURNING id queries, the id is in result.rows[0]
-  const lastInsertId = result.rows[0]?.id || 0;
-  return { lastInsertId, rowCount: result.rowCount || 0 };
 }
 
 const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS expense_categories (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     type TEXT NOT NULL DEFAULT 'other',
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at DATETIME DEFAULT (datetime('now', 'localtime'))
 );
-
 CREATE TABLE IF NOT EXISTS clients (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     contact_info TEXT,
     notes TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at DATETIME DEFAULT (datetime('now', 'localtime'))
 );
-
 CREATE TABLE IF NOT EXISTS projects (
-    id SERIAL PRIMARY KEY,
-    client_id INTEGER NOT NULL REFERENCES clients(id),
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
-    budget DECIMAL DEFAULT 0,
-    start_date DATE,
-    end_date DATE,
+    budget REAL DEFAULT 0,
+    start_date TEXT,
+    end_date TEXT,
     status TEXT DEFAULT '进行中',
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at DATETIME DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (client_id) REFERENCES clients(id)
 );
-
 CREATE TABLE IF NOT EXISTS revenues (
-    id SERIAL PRIMARY KEY,
-    project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
-    client_id INTEGER NOT NULL REFERENCES clients(id),
-    amount DECIMAL NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER,
+    client_id INTEGER NOT NULL,
+    amount REAL NOT NULL,
     description TEXT,
     invoice_number TEXT,
-    payment_date DATE,
+    payment_date TEXT,
     payment_method TEXT,
     size TEXT,
     status TEXT DEFAULT '未支付',
     notes TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at DATETIME DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+    FOREIGN KEY (client_id) REFERENCES clients(id)
 );
-
 CREATE TABLE IF NOT EXISTS expenses (
-    id SERIAL PRIMARY KEY,
-    project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
-    category_id INTEGER NOT NULL REFERENCES expense_categories(id),
-    amount DECIMAL NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER,
+    category_id INTEGER NOT NULL,
+    amount REAL NOT NULL,
     description TEXT,
-    expense_date DATE,
+    expense_date TEXT,
     vendor TEXT,
     payment_method TEXT,
     size TEXT,
     notes TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at DATETIME DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+    FOREIGN KEY (category_id) REFERENCES expense_categories(id)
 );
-
 CREATE INDEX IF NOT EXISTS idx_revenues_client_id ON revenues(client_id);
 CREATE INDEX IF NOT EXISTS idx_revenues_project_id ON revenues(project_id);
 CREATE INDEX IF NOT EXISTS idx_revenues_payment_date ON revenues(payment_date);
@@ -104,24 +117,34 @@ const SEED_CATEGORIES = [
 ];
 
 export async function initDatabase(): Promise<void> {
-  // Run schema
-  await pool.query(SCHEMA_SQL);
+  const SQL = await initSqlJs();
 
-  // Seed categories if empty
-  const countResult = await pool.query('SELECT COUNT(*) FROM expense_categories');
-  if (parseInt(countResult.rows[0].count) === 0) {
-    for (const [name, type] of SEED_CATEGORIES) {
-      await pool.query('INSERT INTO expense_categories (name, type) VALUES ($1, $2)', [name, type]);
-    }
+  if (fs.existsSync(DB_PATH)) {
+    const fileBuffer = fs.readFileSync(DB_PATH);
+    db = new SQL.Database(fileBuffer);
+  } else {
+    const dir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    db = new SQL.Database();
   }
 
-  console.log('Database initialized (PostgreSQL)');
-}
+  db.run('PRAGMA foreign_keys = ON');
 
-// Graceful shutdown
-export async function closeDatabase(): Promise<void> {
-  await pool.end();
-}
+  const statements = SCHEMA_SQL.split(';').filter(s => s.trim());
+  for (const stmt of statements) db.run(stmt + ';');
 
-// Export pool for direct access if needed
-export { pool };
+  // Migration: add size if missing
+  try { db.run('ALTER TABLE revenues ADD COLUMN size TEXT'); } catch (_) {}
+  try { db.run('ALTER TABLE expenses ADD COLUMN size TEXT'); } catch (_) {}
+
+  const countResult = db.exec('SELECT COUNT(*) as count FROM expense_categories');
+  const count = countResult[0]?.values[0][0] as number;
+  if (count === 0) {
+    const insert = db.prepare('INSERT INTO expense_categories (name, type) VALUES (?, ?)');
+    for (const [name, type] of SEED_CATEGORIES) insert.run([name, type]);
+    insert.free();
+  }
+
+  saveDb();
+  console.log('Database ready:', DB_PATH);
+}
