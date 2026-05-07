@@ -125,12 +125,12 @@ export default function RevenuePage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">发票号</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">客户</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">项目</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">描述</th>
                   <th className="text-left px-3 py-3 text-sm font-medium text-gray-500">尺寸</th>
                   <th className="text-right px-3 py-3 text-sm font-medium text-gray-500">平米</th>
+                  <th className="text-right px-3 py-3 text-sm font-medium text-gray-500">单价/㎡</th>
                   <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">金额</th>
                   <th className="text-left px-3 py-3 text-sm font-medium text-gray-500">日期</th>
                   <th className="text-left px-3 py-3 text-sm font-medium text-gray-500">方式</th>
@@ -143,12 +143,14 @@ export default function RevenuePage() {
                   const isUnpaid = r.status === '未支付';
                   return (
                     <tr key={r.id} className={`border-b border-gray-100 hover:bg-gray-50 ${isUnpaid ? 'bg-red-50/30' : ''}`}>
-                      <td className="px-4 py-3 text-sm text-gray-500">{r.invoice_number || '-'}</td>
                       <td className="px-4 py-3 text-sm">{r.client_name || '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-500">{r.project_name || '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-500 max-w-[120px] truncate">{r.description || '-'}</td>
                       <td className="px-3 py-3 text-sm text-gray-500">{r.size || '-'}</td>
                       <td className="px-3 py-3 text-sm text-right">{r.square_meters ? `${r.square_meters}㎡` : '-'}</td>
+                      <td className="px-3 py-3 text-sm text-right text-blue-600 font-medium">
+                        {r.square_meters && r.square_meters > 0 ? `¥${formatMoney(r.amount / r.square_meters)}` : '-'}
+                      </td>
                       <td className="px-4 py-3 text-sm text-right text-green-600 font-medium">{formatMoney(r.amount)}</td>
                       <td className="px-3 py-3 text-sm text-gray-500">{r.payment_date || '-'}</td>
                       <td className="px-3 py-3 text-sm text-gray-500">{r.payment_method || '-'}</td>
