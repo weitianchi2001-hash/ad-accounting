@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  margin: 0;
+  background-color: #f5f6fa;
+}
+
+* {
+  box-sizing: border-box;
+}
