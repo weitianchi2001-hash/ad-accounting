@@ -23,15 +23,19 @@ app.use('/api', expensesRouter);
 app.use('/api', categoriesRouter);
 app.use('/api', reportsRouter);
 
-// Serve frontend static files in production
+// Serve frontend static files
 const frontendPath = path.join(__dirname, '..', '..', 'dist');
 app.use(express.static(frontendPath));
 app.get('*', (_req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-initDatabase().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+// Start server, then init database
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log('Frontend path:', frontendPath);
+  console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'set' : 'NOT SET');
+  initDatabase()
+    .then(() => console.log('Database ready'))
+    .catch(err => console.error('Database init failed:', err.message));
 });
