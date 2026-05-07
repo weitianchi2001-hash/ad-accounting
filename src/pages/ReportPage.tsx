@@ -78,7 +78,7 @@ export default function ReportPage() {
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-base font-semibold text-gray-700 mb-4">支出类别占比</h3>
-          <ExpensePieChart data={byCategory || []} />
+          <ExpensePieChart data={(byCategory || []).map(c => ({ name: c.category_name, amount: c.amount, percentage: c.percentage }))} />
         </div>
       </div>
 
