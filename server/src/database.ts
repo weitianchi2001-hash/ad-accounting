@@ -56,15 +56,14 @@ CREATE TABLE IF NOT EXISTS clients (
 );
 CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_id INTEGER NOT NULL,
+    client_id INTEGER,
     name TEXT NOT NULL,
     description TEXT,
     budget REAL DEFAULT 0,
     start_date TEXT,
     end_date TEXT,
     status TEXT DEFAULT '进行中',
-    created_at DATETIME DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (client_id) REFERENCES clients(id)
+    created_at DATETIME DEFAULT (datetime('now', 'localtime'))
 );
 CREATE TABLE IF NOT EXISTS revenues (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -140,6 +139,14 @@ export async function initDatabase(): Promise<void> {
   try { db.run('ALTER TABLE expenses ADD COLUMN size TEXT'); } catch (_) {}
   try { db.run('ALTER TABLE revenues ADD COLUMN square_meters REAL DEFAULT 0'); } catch (_) {}
   try { db.run('ALTER TABLE expenses ADD COLUMN square_meters REAL DEFAULT 0'); } catch (_) {}
+
+  // Migration: make projects.client_id nullable (for multi-client projects)
+  try {
+    db.run('CREATE TABLE IF NOT EXISTS projects_new (id INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, name TEXT NOT NULL, description TEXT, budget REAL DEFAULT 0, start_date TEXT, end_date TEXT, status TEXT DEFAULT \'进行中\', created_at DATETIME DEFAULT (datetime(\'now\', \'localtime\')))');
+    db.run('INSERT INTO projects_new (id, client_id, name, description, budget, start_date, end_date, status, created_at) SELECT id, client_id, name, description, budget, start_date, end_date, status, created_at FROM projects');
+    db.run('DROP TABLE projects');
+    db.run('ALTER TABLE projects_new RENAME TO projects');
+  } catch (_) { /* already migrated */ }
 
   const countResult = db.exec('SELECT COUNT(*) as count FROM expense_categories');
   const count = countResult[0]?.values[0][0] as number;

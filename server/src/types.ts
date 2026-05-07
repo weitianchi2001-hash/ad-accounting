@@ -15,7 +15,7 @@ export interface Client {
 
 export interface Project {
   id: number;
-  client_id: number;
+  client_id: number | null;
   name: string;
   description: string | null;
   budget: number;

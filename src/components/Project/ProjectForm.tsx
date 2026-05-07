@@ -6,7 +6,7 @@ import { fetchClients } from '../../api';
 import type { Project, Client } from '../../types';
 
 const schema = z.object({
-  client_id: z.string().min(1, '请选择客户'),
+  client_id: z.string().optional().or(z.literal('')),
   name: z.string().min(1, '项目名称不能为空'),
   description: z.string().optional().or(z.literal('')),
   budget: z.string().optional(),
@@ -46,12 +46,11 @@ export default function ProjectForm({ initial, onSubmit, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">客户 *</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">客户</label>
         <select {...register('client_id')} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">请选择客户</option>
+          <option value="">共享项目（可多客户参与）</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        {errors.client_id && <p className="mt-1 text-sm text-red-500">{errors.client_id.message}</p>}
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">项目名称 *</label>

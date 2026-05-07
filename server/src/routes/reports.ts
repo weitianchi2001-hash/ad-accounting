@@ -71,6 +71,7 @@ reportsRouter.get('/reports/by-project', (req, res) => {
     if (end_date) { whereR += ' AND r2.payment_date <= ?'; params.push(String(end_date)); whereE += ' AND e2.expense_date <= ?'; paramsE.push(String(end_date)); }
 
     const data = all(`SELECT p.id as project_id, p.name as project_name, c.name as client_name,
+      (SELECT GROUP_CONCAT(DISTINCT cl.name) FROM revenues r3 LEFT JOIN clients cl ON r3.client_id = cl.id WHERE r3.project_id = p.id) as participant_clients,
       COALESCE((SELECT SUM(r2.amount) FROM revenues r2 WHERE r2.project_id = p.id ${whereR}), 0) as income,
       COALESCE((SELECT SUM(e2.amount) FROM expenses e2 WHERE e2.project_id = p.id ${whereE}), 0) as expense,
       COALESCE((SELECT SUM(r2.amount) FROM revenues r2 WHERE r2.project_id = p.id ${whereR}), 0) - COALESCE((SELECT SUM(e2.amount) FROM expenses e2 WHERE e2.project_id = p.id ${whereE}), 0) as profit

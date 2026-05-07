@@ -91,7 +91,7 @@ export default function ProjectPage() {
                     <td className="px-6 py-3 text-sm font-medium text-gray-800">
                       <InlineEdit value={p.name} onSave={v => handleFieldSave(p, 'name', v)} />
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-500">{p.client_name || '-'}</td>
+                    <td className="px-6 py-3 text-sm text-gray-500">{p.client_name || '共享项目'}</td>
                     <td className="px-6 py-3 text-sm text-right text-green-600">{formatMoney(p.actual_income)}</td>
                     <td className="px-6 py-3 text-sm text-right text-red-500">{formatMoney(p.actual_expense)}</td>
                     <td className="px-6 py-3 text-sm text-right font-medium" style={{ color: profit >= 0 ? '#16a34a' : '#dc2626' }}>
@@ -112,7 +112,7 @@ export default function ProjectPage() {
         <ProjectForm
           initial={null}
           onSubmit={(formData) => {
-            createMut.mutate({ ...formData, client_id: Number(formData.client_id), budget: Number(formData.budget) || 0 });
+            createMut.mutate({ ...formData, client_id: formData.client_id ? Number(formData.client_id) : null, budget: Number(formData.budget) || 0 });
           }}
           onCancel={() => setModalOpen(false)}
         />

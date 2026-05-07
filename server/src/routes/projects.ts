@@ -34,10 +34,10 @@ projectsRouter.get('/projects/:id', (req, res) => {
 projectsRouter.post('/projects', (req, res) => {
   try {
     const { client_id, name, description, budget, start_date, end_date, status } = req.body;
-    if (!client_id || !name) { res.status(400).json({ success: false, error: '客户和项目名称不能为空' }); return; }
+    if (!name) { res.status(400).json({ success: false, error: '项目名称不能为空' }); return; }
     const result = run(
       'INSERT INTO projects (client_id, name, description, budget, start_date, end_date, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [client_id, name, description || null, budget || 0, start_date || null, end_date || null, status || '进行中']
+      [client_id || null, name, description || null, budget || 0, start_date || null, end_date || null, status || '进行中']
     );
     const project = get(`SELECT p.*, c.name as client_name FROM projects p LEFT JOIN clients c ON p.client_id = c.id WHERE p.id = ?`, [result.lastInsertRowid]);
     res.json({ success: true, data: project });
@@ -53,7 +53,7 @@ projectsRouter.put('/projects/:id', (req, res) => {
     const { client_id, name, description, budget, start_date, end_date, status } = req.body;
     run(
       'UPDATE projects SET client_id=?, name=?, description=?, budget=?, start_date=?, end_date=?, status=? WHERE id=?',
-      [client_id || existing.client_id, name || existing.name, description ?? existing.description, budget ?? existing.budget, start_date ?? existing.start_date, end_date ?? existing.end_date, status || existing.status, req.params.id]
+      [client_id !== undefined ? client_id : existing.client_id, name || existing.name, description ?? existing.description, budget ?? existing.budget, start_date ?? existing.start_date, end_date ?? existing.end_date, status || existing.status, req.params.id]
     );
     const updated = get(`SELECT p.*, c.name as client_name FROM projects p LEFT JOIN clients c ON p.client_id = c.id WHERE p.id = ?`, [req.params.id]);
     res.json({ success: true, data: updated });
