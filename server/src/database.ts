@@ -1,8 +1,10 @@
 import initSqlJs, { Database as SqlJsDatabase } from 'sql.js';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'accounting.db');
+const DATA_DIR = path.join(os.homedir(), 'Documents', '广告记账');
+const DB_PATH = path.join(DATA_DIR, 'accounting.db');
 
 let db: SqlJsDatabase;
 

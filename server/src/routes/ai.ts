@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { all, get } from '../database';
 
-const CONFIG_PATH = path.join(__dirname, '..', 'data', 'config.json');
+const DATA_DIR = path.join(os.homedir(), 'Documents', '广告记账');
+const CONFIG_PATH = path.join(DATA_DIR, 'config.json');
 
 export const aiRouter = Router();
 
