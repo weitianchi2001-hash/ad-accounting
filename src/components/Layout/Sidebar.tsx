@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Receipt, CreditCard,
   Users, FolderKanban, BarChart3, Brain,
 } from 'lucide-react';
+import logoSvg from '../../assets/logo.svg';
 
 const navItems = [
   { to: '/dashboard', label: '仪表盘', icon: LayoutDashboard },
@@ -17,9 +18,10 @@ const navItems = [
 export default function Sidebar() {
   return (
     <aside className="w-56 bg-slate-800 text-white min-h-screen flex flex-col">
-      <div className="p-5 border-b border-slate-700">
-        <h1 className="text-lg font-bold tracking-wide">广告记账</h1>
-        <p className="text-xs text-slate-400 mt-1">广告公司记账系统</p>
+      <div className="p-5 border-b border-slate-700 flex flex-col items-center">
+        <img src={logoSvg} alt="环宇视野" className="w-16 h-16 mb-3" />
+        <h1 className="text-base font-bold tracking-wide">环宇视野</h1>
+        <p className="text-xs text-slate-400 mt-1">记账管理系统</p>
       </div>
       <nav className="flex-1 py-3">
         {navItems.map(item => (

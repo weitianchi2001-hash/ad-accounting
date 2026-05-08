@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ============================================
-echo     广告记账系统 - 打包工具
+echo     环宇视野记账系统 - 打包工具
 echo ============================================
 echo.
 
@@ -31,7 +31,7 @@ if not exist "runtime\node.exe" (
 
 :: 3. Create ZIP package
 echo [3/3] 创建打包文件...
-set OUTDIR=广告记账系统
+set OUTDIR=环宇视野记账系统
 rmdir /s /q "%OUTDIR%" 2>nul
 mkdir "%OUTDIR%"
 mkdir "%OUTDIR%\runtime"
@@ -46,12 +46,12 @@ copy 启动.vbs "%OUTDIR%\" >nul
 rmdir /s /q "%OUTDIR%\server\node_modules\.cache" 2>nul
 
 :: Create zip
-powershell -Command "Compress-Archive -Path '%OUTDIR%' -DestinationPath '广告记账系统.zip' -Force"
+powershell -Command "Compress-Archive -Path '%OUTDIR%' -DestinationPath '环宇视野记账系统.zip' -Force"
 rmdir /s /q "%OUTDIR%"
 
 echo.
 echo ============================================
-echo     打包完成！文件：广告记账系统.zip
+echo     打包完成！文件：环宇视野记账系统.zip
 echo     把这个 ZIP 发给别人，解压后双击
 echo     启动.vbs 即可使用，无需安装任何东西
 echo ============================================

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
-const DATA_DIR = path.join(os.homedir(), 'Documents', '广告记账');
+const DATA_DIR = path.join(os.homedir(), 'Documents', '环宇视野记账');
 const DB_PATH = path.join(DATA_DIR, 'accounting.db');
 
 let db: SqlJsDatabase;

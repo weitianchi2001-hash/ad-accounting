@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="90" fill="url(#bg)" />
+  <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+  <circle cx="100" cy="100" r="50" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+  <!-- Crosshair / vision focus -->
+  <line x1="100" y1="35" x2="100" y2="60" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="100" y1="140" x2="100" y2="165" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="35" y1="100" x2="60" y2="100" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="140" y1="100" x2="165" y2="100" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="100" cy="100" r="8" fill="white"/>
+  <!-- Text -->
+  <text x="100" y="185" text-anchor="middle" fill="white" font-size="18" font-family="Microsoft YaHei, sans-serif" font-weight="bold">环宇视野</text>
+</svg>

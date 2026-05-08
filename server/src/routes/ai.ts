@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 import { all, get } from '../database';
 
-const DATA_DIR = path.join(os.homedir(), 'Documents', '广告记账');
+const DATA_DIR = path.join(os.homedir(), 'Documents', '环宇视野记账');
 const CONFIG_PATH = path.join(DATA_DIR, 'config.json');
 
 export const aiRouter = Router();
@@ -88,7 +88,7 @@ aiRouter.get('/ai/analyze', async (req, res) => {
 
     const data = buildDataSummary();
 
-    const prompt = `你是一个广告公司的财务分析专家。请根据以下数据进行分析，用中文回复，直接给出要点，不要客套话。
+    const prompt = `你是一个环宇视野的财务分析专家。请根据以下数据进行分析，用中文回复，直接给出要点，不要客套话。
 
 数据：
 - 总收入：¥${data.summary.totalRevenue.toLocaleString()}
@@ -133,7 +133,7 @@ aiRouter.post('/ai/chat', async (req, res) => {
 
     const data = buildDataSummary();
 
-    const systemPrompt = `你是广告公司记账系统的AI助手。以下是当前财务数据，请根据数据回答用户问题。用中文，简洁直接。
+    const systemPrompt = `你是环宇视野记账系统的AI助手。以下是当前财务数据，请根据数据回答用户问题。用中文，简洁直接。
 
 数据概览：
 ${JSON.stringify(data, null, 2)}`;
