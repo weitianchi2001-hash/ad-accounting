@@ -1,21 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3b82f6"/>
-      <stop offset="100%" style="stop-color:#7c3aed"/>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f"/>
+      <stop offset="50%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
     </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#ef4444"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="circleClip">
+      <circle cx="120" cy="110" r="75"/>
+    </clipPath>
   </defs>
-  <!-- Outer ring -->
-  <circle cx="100" cy="100" r="90" fill="url(#bg)" />
-  <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-  <circle cx="100" cy="100" r="50" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
-  <!-- Crosshair / vision focus -->
-  <line x1="100" y1="35" x2="100" y2="60" stroke="white" stroke-width="4" stroke-linecap="round"/>
-  <line x1="100" y1="140" x2="100" y2="165" stroke="white" stroke-width="4" stroke-linecap="round"/>
-  <line x1="35" y1="100" x2="60" y2="100" stroke="white" stroke-width="4" stroke-linecap="round"/>
-  <line x1="140" y1="100" x2="165" y2="100" stroke="white" stroke-width="4" stroke-linecap="round"/>
-  <!-- Center dot -->
-  <circle cx="100" cy="100" r="8" fill="white"/>
-  <!-- Text -->
-  <text x="100" y="185" text-anchor="middle" fill="white" font-size="18" font-family="Microsoft YaHei, sans-serif" font-weight="bold">环宇视野</text>
+
+  <!-- Background circle with subtle border -->
+  <circle cx="120" cy="110" r="88" fill="#0f172a"/>
+  <circle cx="120" cy="110" r="88" fill="none" stroke="url(#g2)" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Inner decorative ring -->
+  <circle cx="120" cy="110" r="78" fill="none" stroke="url(#g1)" stroke-width="0.5" opacity="0.6" stroke-dasharray="6 4"/>
+
+  <!-- Eye / vision shape -->
+  <g clip-path="url(#circleClip)">
+    <!-- Iris gradient -->
+    <ellipse cx="120" cy="110" rx="55" ry="42" fill="url(#g2)" opacity="0.9"/>
+
+    <!-- Light reflections -->
+    <ellipse cx="105" cy="95" rx="18" ry="12" fill="white" opacity="0.15" transform="rotate(-15 105 95)"/>
+    <ellipse cx="135" cy="120" rx="8" ry="5" fill="white" opacity="0.08"/>
+
+    <!-- Pupil -->
+    <circle cx="120" cy="110" r="18" fill="#0f172a"/>
+
+    <!-- Pupil highlight -->
+    <circle cx="126" cy="104" r="5" fill="white" opacity="0.3"/>
+
+    <!-- Iris texture lines -->
+    <line x1="95" y1="100" x2="110" y2="100" stroke="white" stroke-width="0.5" opacity="0.15"/>
+    <line x1="100" y1="115" x2="112" y2="112" stroke="white" stroke-width="0.5" opacity="0.12"/>
+    <line x1="130" y1="100" x2="142" y2="102" stroke="white" stroke-width="0.5" opacity="0.15"/>
+    <line x1="132" y1="115" x2="142" y2="118" stroke="white" stroke-width="0.5" opacity="0.12"/>
+
+    <!-- Eyelash curve top -->
+    <path d="M 60 95 Q 90 60 120 65 Q 150 60 180 95" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+    <!-- Eyelash curve bottom -->
+    <path d="M 65 120 Q 90 145 120 140 Q 150 145 175 120" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+    <!-- Corner decorations -->
+    <path d="M 50 80 L 60 75" stroke="url(#g3)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 190 80 L 180 75" stroke="url(#g3)" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Outer accent dots -->
+  <circle cx="120" cy="22" r="3" fill="url(#g1)"/>
+  <circle cx="120" cy="198" r="3" fill="url(#g1)"/>
+  <circle cx="32" cy="110" r="3" fill="url(#g1)"/>
+  <circle cx="208" cy="110" r="3" fill="url(#g1)"/>
+
+  <!-- Text at bottom -->
+  <text x="120" y="210" text-anchor="middle" fill="white" font-size="16" font-weight="700" font-family="Microsoft YaHei, sans-serif" letter-spacing="4">环 宇 视 野</text>
 </svg>
